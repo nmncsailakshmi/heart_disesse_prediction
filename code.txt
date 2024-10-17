@@ -1,0 +1,108 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load the dataset
+file_path = '/content/dataset.csv'
+data = pd.read_csv(file_path)
+
+# Checking for missing values
+print("Missing values in the dataset:\n", data.isnull().sum())
+
+# Summary statistics of the dataset
+print("\nSummary statistics:\n", data.describe())
+
+# Countplot for the target variable (Heart Disease)
+plt.figure(figsize=(8, 6))
+sns.countplot(x='Heart Disease', data=data)
+plt.title('Distribution of Heart Disease')
+plt.show()
+
+# Plotting distributions of numeric variables in relation to Heart Disease
+plt.figure(figsize=(14, 10))
+
+# Age vs Heart Disease
+plt.subplot(2, 2, 1)
+sns.histplot(data=data, x='Age', hue='Heart Disease', kde=True, bins=30)
+plt.title('Age Distribution by Heart Disease')
+
+# Cholesterol vs Heart Disease
+plt.subplot(2, 2, 2)
+sns.histplot(data=data, x='Cholesterol', hue='Heart Disease', kde=True, bins=30)
+plt.title('Cholesterol Distribution by Heart Disease')
+
+# Max HR vs Heart Disease
+plt.subplot(2, 2, 3)
+sns.histplot(data=data, x='Max HR', hue='Heart Disease', kde=True, bins=30)
+plt.title('Max Heart Rate Distribution by Heart Disease')
+
+# Chest pain type vs Heart Disease
+plt.subplot(2, 2, 4)
+sns.countplot(x='Chest pain type', hue='Heart Disease', data=data)
+plt.title('Chest Pain Type by Heart Disease')
+
+plt.tight_layout()
+plt.show()
+
+# Correlation heatmap of numeric variables
+plt.figure(figsize=(12, 8))
+# Include numeric_only=True to consider only numeric columns for correlation
+corr_matrix = data.corr(numeric_only=True)
+sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt=".2f")
+plt.title('Correlation Heatmap')
+plt.show()
+
+# Pairplot for selected important features
+important_features = ['Age', 'Cholesterol', 'Max HR', 'Chest pain type', 'BP', 'Heart Disease']
+sns.pairplot(data[important_features], hue='Heart Disease')
+plt.show()
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load the dataset
+file_path = '/content/dataset.csv'  # Update with your file path
+data = pd.read_csv(file_path)
+
+# Data preprocessing
+# Convert categorical target variable 'Heart Disease' to numerical (1 for Presence, 0 for Absence)
+label_encoder = LabelEncoder()
+data['Heart Disease'] = label_encoder.fit_transform(data['Heart Disease'])  # Presence=1, Absence=0
+
+# Splitting features (X) and target (y)
+X = data.drop(columns=['Heart Disease'])
+y = data['Heart Disease']
+
+# Convert categorical columns to dummy variables (one-hot encoding for non-numeric columns)
+X = pd.get_dummies(X, drop_first=True)
+
+# Splitting the data into training and testing sets (80% training, 20% testing)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model training using Logistic Regression
+logreg = LogisticRegression(max_iter=1000)
+logreg.fit(X_train, y_train)
+
+# Predicting on the test set
+y_pred = logreg.predict(X_test)
+
+# Model evaluation
+accuracy = accuracy_score(y_test, y_pred)
+classification_rep = classification_report(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+# Output the results
+print(f"Accuracy: {accuracy:.4f}")
+print("\nClassification Report:\n", classification_rep)
+
+# Confusion Matrix
+plt.figure(figsize=(8, 6))
+sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="Blues")
+plt.title("Confusion Matrix")
+plt.ylabel("Actual")
+plt.xlabel("Predicted")
+plt.show()
